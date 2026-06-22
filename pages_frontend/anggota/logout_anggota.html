@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konfirmasi Keluar — Inas Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f1ea;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .confirm-card {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border: 1px solid #e2ddd0;
+    border-radius: 8px;
+    padding: 40px 32px 28px;
+    text-align: center;
+  }
+
+  .confirm-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2b2b26;
+    margin-bottom: 32px;
+  }
+
+  .confirm-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .confirm-btn {
+    padding: 10px 22px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .confirm-btn:hover { opacity: 0.85; }
+
+  .confirm-btn.cancel {
+    background: #ece8de;
+    color: #2b2b26;
+  }
+
+  .confirm-btn.keluar {
+    background: #a01c1c;
+    color: #fff;
+  }
+
+  .confirm-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+  <div class="confirm-card">
+    <p class="confirm-text">Apakah kamu yakin ingin keluar?</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" id="cancelBtn">Batal</button>
+      <button class="confirm-btn keluar" id="keluarBtn">Keluar</button>
+    </div>
+  </div>
+
+  <script>
+    // Tombol Batal: kembali ke halaman sebelumnya
+    document.getElementById("cancelBtn").addEventListener("click", () => {
+      // document.referrer = halaman tempat user datang sebelum ke sini
+      if (document.referrer && document.referrer.includes(window.location.host)) {
+        window.history.back();
+      } else {
+        // fallback kalau referrer tidak terdeteksi (misal dibuka langsung)
+        window.location.href = "katalog_anggota.html";
+      }
+    });
+
+    // Tombol Keluar: hapus sesi, lalu redirect ke index.html
+    document.getElementById("keluarBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("dummy_profile");
+      window.location.href = "../../index.html";
+    });
+  </script>
+
+</body>
+</html>

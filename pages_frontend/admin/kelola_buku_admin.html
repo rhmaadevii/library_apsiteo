@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelola Buku — Inas Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --green-dark: #1d3b2f;
+    --green-darker: #14291f;
+    --green-soft: #e7ede9;
+    --cream: #f4f1ea;
+    --cream-card: #fbfaf6;
+    --ink: #2b2b26;
+    --muted: #7a7a72;
+    --border: #e2ddd0;
+    --input-bg: #f5f3ee;
+    --error: #b3492f;
+    --error-bg: #fbeae5;
+    --ok-text: #2f7a45;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 20px;
+    min-height: 100vh;
+  }
+
+  .sidebar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; stroke: var(--ink); }
+  .nav-item:hover { background: var(--green-soft); }
+  .nav-item.active { background: var(--green-soft); color: var(--green-dark); font-weight: 600; }
+  .nav-item.active svg { stroke: var(--green-dark); }
+
+  .sidebar-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-info .admin-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .admin-info .admin-label { font-size: 11.5px; color: var(--muted); }
+
+  .logout-icon {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer;
+    transition: background 0.15s ease; text-decoration: none;
+  }
+  .logout-icon:hover { background: var(--error-bg); }
+  .logout-icon svg { width: 17px; height: 17px; stroke: var(--muted); }
+  .logout-icon:hover svg { stroke: var(--error); }
+
+  /* ===== MAIN ===== */
+  .main { flex: 1; padding: 40px 48px; overflow-y: auto; }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  h1.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 600; color: var(--ink);
+  }
+
+  .btn-tambah {
+    display: flex; align-items: center; gap: 7px;
+    padding: 11px 20px;
+    background: var(--green-dark); color: var(--cream);
+    border: none; border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s ease;
+  }
+  .btn-tambah:hover { background: var(--green-darker); }
+  .btn-tambah svg { width: 15px; height: 15px; stroke: var(--cream); }
+
+  /* ===== TABLE CONTAINER ===== */
+  .table-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .table-top {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .search-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    max-width: 380px;
+  }
+  .search-bar svg { width: 15px; height: 15px; stroke: var(--muted); flex-shrink: 0; }
+  .search-bar input {
+    border: none; outline: none; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--ink); width: 100%;
+  }
+  .search-bar input::placeholder { color: #9a968a; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead tr { border-bottom: 1px solid var(--border); }
+  thead th {
+    text-align: left; padding: 13px 16px;
+    font-size: 13px; font-weight: 700; color: var(--ink);
+  }
+
+  tbody tr { border-bottom: 1px solid #f0ece3; transition: background 0.1s ease; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf8f3; }
+  tbody td { padding: 13px 16px; font-size: 13.5px; color: var(--ink); vertical-align: middle; }
+
+  .buku-cell { display: flex; align-items: center; gap: 12px; }
+  .buku-thumb {
+    width: 32px; height: 42px;
+    background: #d8d3c5; border-radius: 3px; flex-shrink: 0;
+  }
+  .buku-judul { font-weight: 600; font-size: 13.5px; }
+  .buku-penulis { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .badge-kategori {
+    display: inline-block; padding: 4px 10px;
+    background: var(--green-soft); color: var(--green-dark);
+    border-radius: 3px; font-size: 11.5px; font-weight: 600;
+  }
+
+  .availability { font-weight: 600; }
+  .availability.available { color: var(--ok-text); }
+  .availability.unavailable { color: var(--error); }
+
+  .action-cell { display: flex; align-items: center; gap: 10px; }
+
+  .action-btn {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent; cursor: pointer;
+    border-radius: 4px; transition: background 0.15s ease;
+  }
+  .action-btn svg { width: 15px; height: 15px; }
+  .action-btn.edit svg { stroke: var(--green-dark); }
+  .action-btn.edit:hover { background: var(--green-soft); }
+  .action-btn.del svg { stroke: var(--error); }
+  .action-btn.del:hover { background: var(--error-bg); }
+
+  .empty-row td { text-align: center; color: var(--muted); padding: 40px; }
+
+  /* ===== MODAL OVERLAY ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(20,30,24,0.45);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px; z-index: 100;
+  }
+  .modal-overlay.show { display: flex; animation: fadeIn 0.15s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-card {
+    background: #fff;
+    border-radius: 8px;
+    width: 100%; max-width: 580px;
+    padding: 32px;
+    animation: popIn 0.18s ease;
+    position: relative;
+  }
+  .modal-card.small { max-width: 420px; }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--ink); }
+
+  .modal-close {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border: none; background: transparent; cursor: pointer; border-radius: 4px;
+  }
+  .modal-close:hover { background: var(--input-bg); }
+  .modal-close svg { width: 16px; height: 16px; stroke: var(--muted); }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-group label { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--green-dark); }
+  .form-group input.invalid,
+  .form-group select.invalid { border-color: var(--error); }
+  .form-group textarea { resize: vertical; min-height: 68px; }
+
+  .modal-actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;
+  }
+
+  .btn { padding: 10px 22px; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; border: none; cursor: pointer; transition: opacity 0.15s ease; }
+  .btn:hover { opacity: 0.85; }
+  .btn.outline { background: transparent; border: 1px solid var(--border); color: var(--ink); }
+  .btn.primary { background: var(--green-dark); color: #fff; }
+  .btn.danger { background: #a01c1c; color: #fff; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* DELETE MODAL */
+  .delete-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+  .delete-text { font-size: 13.5px; color: var(--muted); margin-bottom: 28px; }
+  .delete-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; top: 24px; right: 24px;
+    background: var(--green-dark); color: var(--cream);
+    padding: 13px 20px; border-radius: 4px;
+    font-size: 13.5px; font-weight: 500;
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.3);
+    opacity: 0; transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* LOGOUT MODAL */
+  .logout-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(20,30,24,0.45);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px; z-index: 150;
+  }
+  .logout-modal-overlay.show { display: flex; }
+  .logout-modal-card {
+    background: #fff; border-radius: 8px;
+    max-width: 420px; width: 100%;
+    padding: 40px 32px 28px; text-align: center;
+  }
+  .logout-modal-text { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 32px; }
+  .logout-modal-actions { display: flex; justify-content: space-between; }
+  .lm-btn { padding: 10px 22px; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; border: none; cursor: pointer; }
+  .lm-btn.cancel { background: #ece8de; color: var(--ink); }
+  .lm-btn.keluar { background: #a01c1c; color: #fff; }
+</style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">Admin</div>
+      <a href="dashboard_admin.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </a>
+      <a href="kelola_buku_admin.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        Kelola Buku
+      </a>
+      <a href="kelola_anggota_admin.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21c0-3.9 3.1-7 7-7"/><circle cx="17" cy="15" r="3"/><path d="M14 21v-1a3 3 0 0 1 6 0v1"/></svg>
+        Kelola Anggota
+      </a>
+      <a href="kelola_transaksi.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3H1v18h15"/><path d="M8 21V3"/><path d="m17 8 4 4-4 4"/><path d="M21 12H9"/></svg>
+        Transaksi
+      </a>
+      <a href="laporan.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Laporan
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="admin-info">
+        <div class="admin-name" id="adminName">Admin Name</div>
+        <div class="admin-label">Logout</div>
+      </div>
+      <a href="#" class="logout-icon" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="top-row">
+      <h1 class="page-title">Kelola Buku</h1>
+      <button class="btn-tambah" id="btnTambah">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Tambah Buku
+      </button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-top">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Cari buku.....">
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Buku</th>
+            <th>Kategori</th>
+            <th>ID Buku</th>
+            <th>ISBN</th>
+            <th>Availability</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="bukuBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- MODAL TAMBAH BUKU -->
+  <div class="modal-overlay" id="modalTambah">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Tambah Buku</span>
+        <button class="modal-close" data-close="modalTambah">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="formTambah">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="t_judul">Judul</label>
+            <input type="text" id="t_judul" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="t_pengarang">Pengarang</label>
+            <input type="text" id="t_pengarang" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="t_isbn">ISBN</label>
+            <input type="text" id="t_isbn" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="t_genre">Genre</label>
+            <input type="text" id="t_genre" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="t_tahun">Tahun</label>
+            <input type="text" id="t_tahun" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="t_cover">Cover Image URL (Optional)</label>
+            <input type="text" id="t_cover" placeholder="">
+          </div>
+          <div class="form-group full">
+            <label for="t_deskripsi">Deskripsi</label>
+            <textarea id="t_deskripsi" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn outline" data-close="modalTambah">Batal</button>
+          <button type="submit" class="btn primary" id="btnSubmitTambah">Tambah Buku</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT BUKU -->
+  <div class="modal-overlay" id="modalEdit">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Edit Buku</span>
+        <button class="modal-close" data-close="modalEdit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="formEdit">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="e_judul">Judul</label>
+            <input type="text" id="e_judul" placeholder="">
+          </div>
+          <div class="form-group">
+            <label for="e_pengarang">Pengarang</label>
+            <input type="text" id="e_pengarang" placeholder="">
+          </div>
+          <div class="form-group full">
+            <label for="e_status">Status</label>
+            <select id="e_status">
+              <option value="available">Available</option>
+              <option value="unavailable">Unavailable</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn outline" data-close="modalEdit">Batal</button>
+          <button type="submit" class="btn primary" id="btnSubmitEdit">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL HAPUS BUKU -->
+  <div class="modal-overlay" id="modalHapus">
+    <div class="modal-card small">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <button class="modal-close" data-close="modalHapus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <p class="delete-title">Hapus Buku</p>
+      <p class="delete-text">Apakah kamu yakin ingin menghapus buku ini dari penyimpanan?</p>
+      <div class="delete-actions">
+        <button class="btn outline" data-close="modalHapus">Batal</button>
+        <button class="btn danger" id="btnKonfirmasiHapus">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGOUT MODAL -->
+  <div class="logout-modal-overlay" id="logoutModal">
+    <div class="logout-modal-card">
+      <p class="logout-modal-text">Apakah kamu yakin ingin keluar?</p>
+      <div class="logout-modal-actions">
+        <button class="lm-btn cancel" id="cancelLogout">Batal</button>
+        <button class="lm-btn keluar" id="keluarBtn">Keluar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/kelola_buku_admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil — Inas Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --green-dark: #1d3b2f;
+    --green-darker: #14291f;
+    --green-soft: #e7ede9;
+    --cream: #f4f1ea;
+    --cream-card: #fbfaf6;
+    --ink: #2b2b26;
+    --muted: #7a7a72;
+    --border: #e2ddd0;
+    --input-bg: #ece8de;
+    --error: #b3492f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 20px;
+    min-height: 100vh;
+  }
+
+  .sidebar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: var(--ink);
+  }
+
+  .nav-item:hover {
+    background: var(--green-soft);
+  }
+
+  .nav-item.active {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    font-weight: 600;
+  }
+
+  .nav-item.active svg {
+    stroke: var(--green-dark);
+  }
+
+  .logout-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 8px 4px;
+  }
+
+  .logout-link svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .logout-link:hover { color: var(--error); }
+
+  /* ===== MAIN CONTENT ===== */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+  }
+
+  h1.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+
+  .profile-card {
+    background: var(--cream-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px;
+    max-width: 640px;
+  }
+
+  .avatar-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+
+  .avatar-circle {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: #d8d3c5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .avatar-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .info-row:last-of-type {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-size: 13px;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 110px;
+  }
+
+  .info-value {
+    font-size: 14px;
+    color: var(--ink);
+    text-align: right;
+    flex: 1;
+  }
+
+  .info-row input {
+    width: 100%;
+    text-align: right;
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .info-row input:focus {
+    border-color: var(--green-dark);
+  }
+
+  .info-row input:disabled {
+    background: transparent;
+    color: var(--ink);
+    cursor: default;
+  }
+
+  .actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+
+  .btn-edit {
+    background: var(--green-soft);
+    color: var(--green-dark);
+  }
+
+  .btn-edit:hover { background: #dbe5de; }
+
+  .btn-save {
+    background: var(--green-dark);
+    color: var(--cream);
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-save:hover { background: var(--green-darker); }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .btn-cancel:hover { color: var(--ink); border-color: var(--ink); }
+
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--green-dark);
+    color: var(--cream);
+    padding: 13px 20px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(244, 241, 234, 0.4);
+    border-top-color: var(--cream);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  .spinner.show { display: inline-block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">Library</div>
+      <a href="profil_anggota.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Profil
+      </a>
+      <a href="katalog_anggota.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        Katalog
+      </a>
+      <a href="riwayat_peminjaman.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+        Riwayat Peminjaman
+      </a>
+    </div>
+
+    <a href="logout_anggota.html" class="logout-link" id="logoutLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Logout
+    </a>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title">Profil</h1>
+
+    <div class="profile-card">
+      <div class="avatar-block">
+        <div class="avatar-circle" id="avatarInitials">--</div>
+        <div class="avatar-name" id="avatarName">—</div>
+      </div>
+
+      <form id="profileForm">
+        <div class="info-row">
+          <span class="info-label">Nama</span>
+          <input type="text" id="nama" disabled>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Username</span>
+          <input type="text" id="username" disabled>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <input type="email" id="email" disabled>
+        </div>
+        <div class="info-row">
+          <span class="info-label">No. Hp</span>
+          <input type="text" id="noHp" disabled>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Alamat</span>
+          <input type="text" id="alamat" disabled>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Password</span>
+          <input type="text" id="password" disabled>
+        </div>
+
+        <div class="actions-row">
+          <button type="button" class="btn btn-cancel" id="cancelBtn">Batal</button>
+          <button type="button" class="btn btn-edit" id="editBtn">Edit Profil</button>
+          <button type="submit" class="btn btn-save" id="saveBtn">
+            <span class="spinner" id="saveSpinner"></span>
+            <span id="saveLabel">Simpan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Profil berhasil diperbarui.</div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/profil_anggota.js"></script>
+</body>
+</html>

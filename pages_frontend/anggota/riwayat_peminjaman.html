@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riwayat Peminjaman — Inas Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --green-dark: #1d3b2f;
+    --green-darker: #14291f;
+    --green-soft: #e7ede9;
+    --cream: #f4f1ea;
+    --cream-card: #fbfaf6;
+    --ink: #2b2b26;
+    --muted: #7a7a72;
+    --border: #e2ddd0;
+    --error: #b3492f;
+    --error-bg: #fbeae5;
+    --error-border: #e3b4a4;
+    --ok-bg: #dde8df;
+    --ok-text: #2f5d44;
+    --gray-cover: #d8d3c5;
+    --gray-bg: #f1efe8;
+    --gray-text: #aba89f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 20px;
+    min-height: 100vh;
+  }
+
+  .sidebar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; stroke: var(--ink); }
+  .nav-item:hover { background: var(--green-soft); }
+
+  .nav-item.active {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    font-weight: 600;
+  }
+
+  .nav-item.active svg { stroke: var(--green-dark); }
+
+  .logout-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 8px 4px;
+  }
+
+  .logout-link svg { width: 16px; height: 16px; }
+  .logout-link:hover { color: var(--error); }
+
+  /* ===== MAIN ===== */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  h1.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+
+  .user-chip svg { width: 18px; height: 18px; stroke: var(--muted); }
+
+  /* ===== FILTER TABS ===== */
+  .tab-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    padding: 9px 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--cream-card);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .tab-btn:hover { border-color: var(--green-dark); }
+
+  .tab-btn.active {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    border-color: var(--green-soft);
+  }
+
+  /* ===== LIST CONTAINER ===== */
+  .list-container {
+    background: var(--cream-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    display: none;
+  }
+
+  .empty-state.show { display: block; }
+
+  /* ===== RIWAYAT CARD ===== */
+  .riwayat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 16px 20px;
+  }
+
+  .riwayat-card.terlambat {
+    border-color: var(--error-border);
+    background: var(--error-bg);
+  }
+
+  .riwayat-cover {
+    width: 42px;
+    height: 56px;
+    background: var(--gray-cover);
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .riwayat-info { flex: 1; min-width: 0; }
+
+  .riwayat-judul {
+    font-family: 'Playfair Display', serif;
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+
+  .riwayat-penulis {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .riwayat-meta {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  .riwayat-card.terlambat .riwayat-meta {
+    color: var(--error);
+  }
+
+  .status-pill {
+    flex-shrink: 0;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 92px;
+  }
+
+  .status-pill.dipinjam {
+    background: var(--ok-bg);
+    color: var(--ok-text);
+  }
+
+  .status-pill.terlambat {
+    background: #f3c7b8;
+    color: var(--error);
+  }
+
+  .status-pill.selesai {
+    background: var(--gray-bg);
+    color: var(--gray-text);
+  }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">Library</div>
+      <a href="profil_anggota.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Profil
+      </a>
+      <a href="katalog_anggota.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        Katalog
+      </a>
+      <a href="riwayat_peminjaman.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+        Riwayat Peminjaman
+      </a>
+    </div>
+
+    <a href="logout_anggota.html" class="logout-link" id="logoutLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Logout
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="top-row">
+      <h1 class="page-title">Riwayat Peminjaman</h1>
+      <div class="user-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+        <span id="userName">—</span>
+      </div>
+    </div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" data-filter="semua">Semua</button>
+      <button class="tab-btn" data-filter="dipinjam">Dipinjam</button>
+      <button class="tab-btn" data-filter="kembali">Kembali</button>
+    </div>
+
+    <div class="list-container" id="listContainer">
+      <div class="empty-state" id="emptyState">Belum ada riwayat peminjaman.</div>
+    </div>
+  </main>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/riwayat.js"></script>
+</body>
+</html>

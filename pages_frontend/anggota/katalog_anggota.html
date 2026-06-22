@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Buku — Inas Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --green-dark: #1d3b2f;
+    --green-darker: #14291f;
+    --green-soft: #e7ede9;
+    --cream: #f4f1ea;
+    --cream-card: #fbfaf6;
+    --ink: #2b2b26;
+    --muted: #7a7a72;
+    --border: #e2ddd0;
+    --input-bg: #ece8de;
+    --error: #b3492f;
+    --error-bg: #f7e2dc;
+    --ok-bg: #dde8df;
+    --ok-text: #2f5d44;
+    --gray-cover: #d8d3c5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--cream);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 20px;
+    min-height: 100vh;
+  }
+
+  .sidebar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--green-dark);
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border-radius: 4px;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .nav-item svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: var(--ink);
+  }
+
+  .nav-item:hover { background: var(--green-soft); }
+
+  .nav-item.active {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    font-weight: 600;
+  }
+
+  .nav-item.active svg { stroke: var(--green-dark); }
+
+  .logout-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 8px 4px;
+  }
+
+  .logout-link svg { width: 16px; height: 16px; }
+  .logout-link:hover { color: var(--error); }
+
+  /* ===== MAIN ===== */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  h1.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+
+  .user-chip svg { width: 18px; height: 18px; stroke: var(--muted); }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--cream-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    max-width: 420px;
+    margin-bottom: 28px;
+  }
+
+  .search-bar svg { width: 16px; height: 16px; stroke: var(--muted); flex-shrink: 0; }
+
+  .search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    width: 100%;
+  }
+
+  .search-bar input::placeholder { color: #9a968a; }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    display: none;
+  }
+
+  .empty-state.show { display: block; }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 22px;
+  }
+
+  .book-card {
+    background: var(--cream-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .book-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -14px rgba(29,59,47,0.25);
+  }
+
+  .book-cover {
+    width: 100%;
+    height: 130px;
+    background: var(--gray-cover);
+  }
+
+  .book-info {
+    padding: 16px;
+  }
+
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .book-author {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .book-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+
+  .badge.tersedia { background: var(--ok-bg); color: var(--ok-text); }
+  .badge.habis { background: var(--error-bg); color: var(--error); }
+
+  .btn-pinjam-mini {
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 3px;
+    border: none;
+    background: var(--green-soft);
+    color: var(--green-dark);
+    cursor: pointer;
+  }
+
+  .btn-pinjam-mini:disabled {
+    background: #eee9e0;
+    color: #b3ada0;
+    cursor: not-allowed;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 30, 24, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 50;
+  }
+
+  .modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.15s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-card {
+    background: var(--cream-card);
+    border-radius: 6px;
+    max-width: 380px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    animation: popIn 0.18s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .modal-close svg { width: 14px; height: 14px; stroke: var(--ink); }
+
+  .modal-cover {
+    width: 100%;
+    height: 220px;
+    background: var(--gray-cover);
+  }
+
+  .modal-body {
+    padding: 28px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.25;
+  }
+
+  .modal-author {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  .modal-status-row {
+    margin-bottom: 24px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-pinjam {
+    flex: 1;
+    padding: 13px;
+    background: var(--green-dark);
+    color: var(--cream);
+    border: none;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-pinjam:hover { background: var(--green-darker); }
+
+  .btn-pinjam:disabled {
+    background: #cfc9bb;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(244, 241, 234, 0.4);
+    border-top-color: var(--cream);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  .spinner.show { display: inline-block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: var(--green-dark);
+    color: var(--cream);
+    padding: 13px 20px;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px -8px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 100;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand">Library</div>
+      <a href="profil_anggota.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Profil
+      </a>
+      <a href="katalog_anggota.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        Katalog
+      </a>
+      <a href="riwayat_peminjaman.html" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+        Riwayat Peminjaman
+      </a>
+    </div>
+
+    <a href="logout_anggota.html" class="logout-link" id="logoutLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Logout
+    </a>
+  </aside>
+
+  <main class="main">
+    <div class="top-row">
+      <h1 class="page-title">Katalog Buku</h1>
+      <div class="user-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>
+        <span id="userName">—</span>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Cari buku...">
+    </div>
+
+    <div class="book-grid" id="bookGrid"></div>
+    <div class="empty-state" id="emptyState">Buku tidak ditemukan.</div>
+  </main>
+
+  <!-- Modal Detail Buku -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div class="modal-cover"></div>
+      <div class="modal-body">
+        <h2 class="modal-title" id="modalTitle">—</h2>
+        <p class="modal-author" id="modalAuthor">—</p>
+        <div class="modal-status-row">
+          <span class="badge" id="modalBadge">—</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-pinjam" id="modalPinjamBtn">
+            <span class="spinner" id="pinjamSpinner"></span>
+            <span id="pinjamLabel">Ajukan Peminjaman</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Peminjaman berhasil diajukan.</div>
+
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/katalog_anggota.js"></script>
+</body>
+</html>
