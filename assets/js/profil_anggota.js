@@ -2,18 +2,7 @@
 // profil.js — Logic lihat & edit profil (Anggota)
 // ===========================================
 
-// ⚠️ SIMULASI SEMENTARA — ganti SIMULATION_MODE jadi false
-// kalau backend dari temenmu sudah siap dan endpoint sudah dipasang.
-const SIMULATION_MODE = true;
 
-const DUMMY_PROFILE = {
-  nama: "Rahmadevi Inas",
-  username: "anggota",
-  email: "rhmainas@gmail.com",
-  noHp: "+62 81234578",
-  alamat: "-",
-  password: "anggota123",
-};
 
 const FIELD_IDS = ["nama", "username", "email", "noHp", "alamat", "password"];
 
@@ -55,24 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== Ambil data profil saat halaman dibuka =====
   async function loadProfile() {
-    if (SIMULATION_MODE) {
-      // Cek apakah ada perubahan tersimpan dari sesi sebelumnya (simulasi persist)
-      const saved = localStorage.getItem("dummy_profile");
-      const data = saved ? JSON.parse(saved) : DUMMY_PROFILE;
-
-      // Pastikan localStorage selalu terisi, supaya halaman lain (katalog, riwayat)
-      // bisa baca nama yang sama meskipun anggota belum pernah klik Edit.
-      if (!saved) {
-        localStorage.setItem("dummy_profile", JSON.stringify(DUMMY_PROFILE));
-      }
-
-      fillForm(data);
-      originalData = { ...data };
-      return;
-    }
-
-    // --- MODE ASLI: ambil dari backend ---
-    // TODO: ganti endpoint sesuai backend, misal "/anggota/profil"
+    // Panggil backend beneran
     try {
       const result = await apiRequest("/anggota/profil", "GET");
       fillForm(result);
@@ -111,19 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveLabel.textContent = "Menyimpan...";
 
     try {
-      if (SIMULATION_MODE) {
-        // --- MODE SIMULASI: simpan ke localStorage, pura-pura nyimpen ke DB ---
-        await new Promise((resolve) => setTimeout(resolve, 600));
-        localStorage.setItem("dummy_profile", JSON.stringify(updatedData));
-        originalData = { ...updatedData };
-        fillForm(updatedData);
-        setEditMode(false);
-        showToast("Profil berhasil diperbarui.");
-        return;
-      }
-
-      // --- MODE ASLI: kirim update ke backend ---
-      // TODO: ganti endpoint sesuai backend, misal "/anggota/profil"
+      // Kirim update ke backend
       const result = await apiRequest("/anggota/profil", "PUT", updatedData);
       originalData = { ...updatedData };
       fillForm(result);

@@ -2,14 +2,7 @@
 // auth.js — Logic login (Admin)
 // ===========================================
 
-// ⚠️ SIMULASI SEMENTARA — hapus / ganti SIMULATION_MODE jadi false
-// kalau backend dari temenmu sudah siap dan endpoint sudah dipasang.
-const SIMULATION_MODE = true;
 
-const DUMMY_ADMIN = {
-  identifier: "admin",
-  password: "admin123",
-};
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -57,28 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     submitLabel.textContent = "Memproses...";
 
     try {
-      if (SIMULATION_MODE) {
-        // --- MODE SIMULASI: cek manual tanpa manggil backend ---
-        await new Promise((resolve) => setTimeout(resolve, 600)); // pura-pura loading
-
-        if (identifier === DUMMY_ADMIN.identifier && password === DUMMY_ADMIN.password) {
-          localStorage.setItem("token", "dummy-token-admin");
-          localStorage.setItem("role", "admin");
-
-          // Inisialisasi data admin dummy begitu login berhasil
-          if (!localStorage.getItem("dummy_admin")) {
-            localStorage.setItem("dummy_admin", JSON.stringify({ nama: "Admin Name" }));
-          }
-
-          window.location.href = "dashboard_admin.html";
-          return;
-        } else {
-          throw new Error("Username/email atau password yang Anda masukkan salah.");
-        }
-      }
-
-      // --- MODE ASLI: manggil backend beneran ---
-      // TODO: ganti endpoint sesuai yang disediakan backend, misal "/auth/login-admin"
+      // Panggil backend beneran
       const result = await apiRequest("/auth/login-admin", "POST", {
         identifier,
         password,

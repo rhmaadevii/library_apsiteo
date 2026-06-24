@@ -2,56 +2,7 @@
 // kelola_transaksi.js — Logic CRUD Kelola Transaksi (Admin)
 // ===========================================
 
-const SIMULATION_MODE = true;
-
-// ===== DUMMY DATA =====
-let DUMMY_TRANSAKSI = [
-  {
-    id: 1,
-    studentNama: "Inas Amatullah",
-    studentUsername: "inas.a",
-    buku: "The Great Gatsby",
-    tglPinjam: "19/10/2026",
-    jatuhTempo: "03/11/2026",
-    status: "aktif",
-  },
-  {
-    id: 2,
-    studentNama: "Rahmadevi Inas",
-    studentUsername: "anggota",
-    buku: "To Kill a Mockingbird",
-    tglPinjam: "01/10/2026",
-    jatuhTempo: "15/10/2026",
-    status: "terlambat",
-  },
-  {
-    id: 3,
-    studentNama: "Rahmadevi",
-    studentUsername: "rahma.s",
-    buku: "1984",
-    tglPinjam: "10/09/2026",
-    jatuhTempo: "24/09/2026",
-    status: "selesai",
-  },
-  {
-    id: 4,
-    studentNama: "Inas Amatullah",
-    studentUsername: "inas.a",
-    buku: "Pride and Prejudice",
-    tglPinjam: "05/10/2026",
-    jatuhTempo: "19/10/2026",
-    status: "terlambat",
-  },
-  {
-    id: 5,
-    studentNama: "Rahmadevi",
-    studentUsername: "rahma.s",
-    buku: "The Catcher in the Rye",
-    tglPinjam: "18/10/2026",
-    jatuhTempo: "01/11/2026",
-    status: "aktif",
-  },
-];
+let DUMMY_TRANSAKSI = [];
 
 let activeFilter = "semua";
 let selectedTransaksiId = null;
@@ -123,16 +74,10 @@ function capitalize(str) {
 
 // ===== LOAD =====
 async function loadTransaksi() {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 250));
-    renderTable();
-    return;
-  }
-  // TODO: ganti endpoint, misal "/transaksi"
+
   try {
     const result = await apiRequest("/transaksi", "GET");
-    // Kalau dari API, assign ke DUMMY_TRANSAKSI atau variabel global
-    // DUMMY_TRANSAKSI = result;
+    DUMMY_TRANSAKSI = result;
     renderTable();
   } catch (err) {
     showToast("Gagal memuat data transaksi.", true);
@@ -158,23 +103,16 @@ function confirmKembalikan(id) {
 
 // ===== KEMBALIKAN BUKU =====
 async function kembalikanBuku(id) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 400));
-    const transaksi = DUMMY_TRANSAKSI.find((t) => String(t.id) === String(id));
-    if (transaksi) transaksi.status = "selesai";
-    return;
-  }
-  // TODO: ganti endpoint, misal "/transaksi/:id/kembalikan"
+
   return await apiRequest(`/transaksi/${id}/kembalikan`, "PATCH", { status: "selesai" });
 }
 
 // ===== DOM READY =====
 document.addEventListener("DOMContentLoaded", () => {
   // Nama admin dari localStorage
-  const savedAdmin = localStorage.getItem("dummy_admin");
-  if (savedAdmin) {
-    document.getElementById("adminName").textContent = JSON.parse(savedAdmin).nama;
-  }
+  apiRequest("/admin/profil", "GET").then(res => {
+    if (res && res.nama) document.getElementById("adminName").textContent = res.nama;
+  }).catch(() => {});
 
   // ===== FILTER TABS =====
   document.querySelectorAll(".tab-btn").forEach((btn) => {

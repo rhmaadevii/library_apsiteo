@@ -2,14 +2,7 @@
 // kelola_buku.js — Logic CRUD Kelola Buku (Admin)
 // ===========================================
 
-const SIMULATION_MODE = true;
-
-let DUMMY_BUKU = [
-  { id: "678-0004", judul: "Sapiens: A Brief History of Humankind", pengarang: "Yuval Noah Harari", kategori: "History", isbn: "978-0771038501", status: "available" },
-  { id: "678-0002", judul: "To Kill a Mocking Bird", pengarang: "Harper Lee", kategori: "History", isbn: "978-0446310789", status: "available" },
-  { id: "678-0003", judul: "The Great Gatsby", pengarang: "F. Scott Fitzgerald", kategori: "History", isbn: "978-0743273565", status: "unavailable" },
-  { id: "678-0001", judul: "Introduction to Algorithms", pengarang: "Thomas H. Carmen", kategori: "History", isbn: "978-0262046305", status: "available" },
-];
+let DUMMY_BUKU = [];
 
 let allBuku = [];
 let selectedId = null; // untuk edit & hapus
@@ -44,7 +37,7 @@ function renderTable(data) {
     <tr data-id="${b.id}">
       <td>
         <div class="buku-cell">
-          <div class="buku-thumb"></div>
+          <div class="buku-thumb"${b.cover ? ` style="background-image: url('${b.cover}'); background-size: cover; background-position: center;"` : ''}></div>
           <div>
             <div class="buku-judul">${b.judul}</div>
             <div class="buku-penulis">${b.pengarang}</div>
@@ -79,26 +72,12 @@ function renderTable(data) {
 
 // ===== LOAD DATA =====
 async function loadBuku(keyword = "") {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 250));
-    let data = DUMMY_BUKU;
-    if (keyword.trim()) {
-      const kw = keyword.toLowerCase();
-      data = DUMMY_BUKU.filter(
-        (b) => b.judul.toLowerCase().includes(kw) || b.pengarang.toLowerCase().includes(kw) || b.isbn.includes(kw)
-      );
-    }
-    allBuku = data;
-    renderTable(data);
-    return;
-  }
 
-  // --- MODE ASLI ---
-  // TODO: ganti endpoint, misal "/buku" atau "/buku?keyword=..."
   try {
     const endpoint = keyword.trim() ? `/buku?keyword=${encodeURIComponent(keyword)}` : "/buku";
     const result = await apiRequest(endpoint, "GET");
     allBuku = result;
+    DUMMY_BUKU = result;
     renderTable(result);
   } catch (err) {
     showToast("Gagal memuat data buku.", true);
@@ -107,48 +86,19 @@ async function loadBuku(keyword = "") {
 
 // ===== TAMBAH BUKU =====
 async function tambahBuku(data) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 500));
-    const newBuku = {
-      id: generateId(),
-      judul: data.judul,
-      pengarang: data.pengarang,
-      kategori: data.genre || "Umum",
-      isbn: data.isbn,
-      status: "available",
-    };
-    DUMMY_BUKU.unshift(newBuku);
-    return newBuku;
-  }
 
-  // TODO: ganti endpoint, misal "/buku"
   return await apiRequest("/buku", "POST", data);
 }
 
 // ===== EDIT BUKU =====
 async function editBuku(id, data) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 500));
-    const idx = DUMMY_BUKU.findIndex((b) => b.id === id);
-    if (idx !== -1) {
-      DUMMY_BUKU[idx] = { ...DUMMY_BUKU[idx], ...data };
-    }
-    return DUMMY_BUKU[idx];
-  }
 
-  // TODO: ganti endpoint, misal "/buku/:id"
   return await apiRequest(`/buku/${id}`, "PUT", data);
 }
 
 // ===== HAPUS BUKU =====
 async function hapusBuku(id) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 400));
-    DUMMY_BUKU = DUMMY_BUKU.filter((b) => b.id !== id);
-    return;
-  }
 
-  // TODO: ganti endpoint, misal "/buku/:id"
   await apiRequest(`/buku/${id}`, "DELETE");
 }
 
@@ -187,10 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutModal = document.getElementById("logoutModal");
 
   // nama admin
-  const savedAdmin = localStorage.getItem("dummy_admin");
-  if (savedAdmin) {
-    document.getElementById("adminName").textContent = JSON.parse(savedAdmin).nama;
-  }
+  apiRequest("/admin/profil", "GET").then(res => {
+    if (res && res.nama) document.getElementById("adminName").textContent = res.nama;
+  }).catch(() => {});
 
   // search debounce
   let searchTimeout;

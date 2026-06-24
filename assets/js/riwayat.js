@@ -2,38 +2,7 @@
 // riwayat.js — Logic riwayat peminjaman (Anggota)
 // ===========================================
 
-// ⚠️ SIMULASI SEMENTARA — ganti SIMULATION_MODE jadi false
-// kalau backend dari temenmu sudah siap dan endpoint sudah dipasang.
-const SIMULATION_MODE = true;
 
-// status di sini mengikuti atribut status_transaksi pada class diagram:
-// "dipinjam" | "terlambat" | "selesai"
-const DUMMY_RIWAYAT = [
-  {
-    id: 1,
-    judul: "Sapiens: A Brief History of Humankind",
-    penulis: "Yuval Noah Harari",
-    status: "dipinjam",
-    tanggal_pinjam: "10/06/2026",
-    jatuh_tempo: "24/06/2026",
-  },
-  {
-    id: 2,
-    judul: "Sapiens: A Brief History of Humankind",
-    penulis: "Yuval Noah Harari",
-    status: "terlambat",
-    terlambat_hari: 6,
-    denda: 30000,
-  },
-  {
-    id: 3,
-    judul: "Sapiens: A Brief History of Humankind",
-    penulis: "Yuval Noah Harari",
-    status: "selesai",
-    tanggal_pinjam: "10/06/2026",
-    tanggal_kembali: "24/06/2026",
-  },
-];
 
 let allRiwayat = [];
 let activeFilter = "semua";
@@ -79,7 +48,7 @@ function renderRiwayat(items) {
     const card = document.createElement("div");
     card.className = "riwayat-card" + (isTerlambat ? " terlambat" : "");
     card.innerHTML = `
-      <div class="riwayat-cover"></div>
+      <div class="riwayat-cover"${item.buku_cover ? ` style="background-image: url('${item.buku_cover}'); background-size: cover; background-position: center;"` : ''}></div>
       <div class="riwayat-info">
         <div class="riwayat-judul">${item.judul}</div>
         <div class="riwayat-penulis">${item.penulis}</div>
@@ -107,12 +76,7 @@ function applyFilter(filter) {
 }
 
 async function loadRiwayat() {
-  if (SIMULATION_MODE) {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    allRiwayat = DUMMY_RIWAYAT;
-    applyFilter(activeFilter);
-    return;
-  }
+
 
   // --- MODE ASLI: ambil dari backend ---
   // TODO: ganti endpoint sesuai backend, misal "/anggota/riwayat-peminjaman"
@@ -132,14 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Nama user diambil dari data profil yang tersimpan (hasil login / edit profil),
   // BUKAN hardcode — supaya otomatis ikut akun yang sedang login.
-  const savedProfile = localStorage.getItem("dummy_profile");
-  if (savedProfile) {
-    const profile = JSON.parse(savedProfile);
-    userNameEl.textContent = profile.nama || "Anggota";
-  } else {
-    // fallback kalau anggota belum pernah buka halaman profil di sesi ini
-    userNameEl.textContent = "Inas Amatullah";
-  }
+  apiRequest("/anggota/profil", "GET").then(res => {
+    userNameEl.textContent = res.nama || "Anggota";
+  }).catch(() => {
+    userNameEl.textContent = "Anggota";
+  });
 
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {

@@ -2,16 +2,7 @@
 // kelola_anggota.js — Logic CRUD Kelola Anggota (Admin)
 // ===========================================
 
-const SIMULATION_MODE = true;
-
-let DUMMY_ANGGOTA = [
-  { id: 1, nama: "Inas Amatullah", username: "inas.a", email: "inas.amtllh@gmail.com", noHp: "+62 8125823582", alamat: "Jl. Cemara No. 1", tanggalDaftar: "14/06/2026", status: "aktif" },
-  { id: 2, nama: "Rahmadevi Inas", username: "anggota", email: "rhmainas@gmail.com", noHp: "+62 81234578", alamat: "-", tanggalDaftar: "14/06/2026", status: "nonaktif" },
-  { id: 3, nama: "Rahmadevi", username: "rahma.s", email: "rahma@gmail.com", noHp: "+62 83856689633", alamat: "Jl. Indah No. 2", tanggalDaftar: "10/06/2026", status: "aktif" },
-];
-
-let nextId = 4;
-let selectedId = null;
+let DUMMY_ANGGOTA = [];
 
 // ===== UTIL =====
 function getInitials(nama) {
@@ -79,14 +70,10 @@ function renderTable(data) {
 
 // ===== LOAD =====
 async function loadAnggota() {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 250));
-    renderTable(DUMMY_ANGGOTA);
-    return;
-  }
-  // TODO: ganti endpoint, misal "/anggota"
+
   try {
     const result = await apiRequest("/anggota", "GET");
+    DUMMY_ANGGOTA = result;
     renderTable(result);
   } catch (err) {
     showToast("Gagal memuat data anggota.", true);
@@ -95,34 +82,13 @@ async function loadAnggota() {
 
 // ===== TAMBAH =====
 async function tambahAnggota(data) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 500));
-    const newAnggota = {
-      id: nextId++,
-      nama: data.nama,
-      username: data.username,
-      email: data.email,
-      noHp: data.noHp,
-      alamat: data.alamat,
-      tanggalDaftar: data.tanggalDaftar,
-      status: "aktif",
-    };
-    DUMMY_ANGGOTA.unshift(newAnggota);
-    return newAnggota;
-  }
-  // TODO: ganti endpoint, misal "/anggota"
+
   return await apiRequest("/anggota", "POST", data);
 }
 
 // ===== EDIT =====
 async function editAnggota(id, data) {
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 500));
-    const idx = DUMMY_ANGGOTA.findIndex((a) => String(a.id) === String(id));
-    if (idx !== -1) DUMMY_ANGGOTA[idx] = { ...DUMMY_ANGGOTA[idx], ...data };
-    return DUMMY_ANGGOTA[idx];
-  }
-  // TODO: ganti endpoint, misal "/anggota/:id"
+
   return await apiRequest(`/anggota/${id}`, "PUT", data);
 }
 
@@ -133,14 +99,7 @@ async function toggleStatus(id) {
 
   const newStatus = anggota.status === "aktif" ? "nonaktif" : "aktif";
 
-  if (SIMULATION_MODE) {
-    await new Promise((r) => setTimeout(r, 300));
-    anggota.status = newStatus;
-    renderTable(DUMMY_ANGGOTA);
-    showToast(`Status ${anggota.nama} diubah menjadi ${newStatus}.`);
-    return;
-  }
-  // TODO: ganti endpoint, misal "/anggota/:id/status"
+
   try {
     await apiRequest(`/anggota/${id}/status`, "PATCH", { status: newStatus });
     loadAnggota();
@@ -184,8 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutModal = document.getElementById("logoutModal");
 
   // nama admin
-  const savedAdmin = localStorage.getItem("dummy_admin");
-  if (savedAdmin) document.getElementById("adminName").textContent = JSON.parse(savedAdmin).nama;
+  apiRequest("/admin/profil", "GET").then(res => {
+    if (res && res.nama) document.getElementById("adminName").textContent = res.nama;
+  }).catch(() => {});
 
   // tampilkan form tambah
   btnTambah.addEventListener("click", () => {

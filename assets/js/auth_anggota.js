@@ -2,14 +2,7 @@
 // auth_anggota.js — Logic login (Anggota)
 // ===========================================
 
-// ⚠️ SIMULASI SEMENTARA — ganti SIMULATION_MODE jadi false
-// kalau backend dari temenmu sudah siap dan endpoint sudah dipasang.
-const SIMULATION_MODE = true;
 
-const DUMMY_ANGGOTA = {
-  identifier: "anggota",
-  password: "anggota123",
-};
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
@@ -57,37 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     submitLabel.textContent = "Memproses...";
 
     try {
-      if (SIMULATION_MODE) {
-        // --- MODE SIMULASI: cek manual tanpa manggil backend ---
-        await new Promise((resolve) => setTimeout(resolve, 600)); // pura-pura loading
-
-        if (identifier === DUMMY_ANGGOTA.identifier && password === DUMMY_ANGGOTA.password) {
-          localStorage.setItem("token", "dummy-token-anggota");
-          localStorage.setItem("role", "anggota");
-
-          // Inisialisasi data profil dummy SEKALI di sini (saat login berhasil),
-          // supaya nama anggota langsung konsisten di semua halaman (katalog, riwayat, profil)
-          // tanpa perlu menunggu anggota membuka halaman Profil dulu.
-          if (!localStorage.getItem("dummy_profile")) {
-            localStorage.setItem("dummy_profile", JSON.stringify({
-              nama: "Inas Amatullah",
-              username: "inas.a",
-              email: "inas.amtllh@gmail.com",
-              noHp: "+62 812xxxxxxx",
-              alamat: "-",
-              password: "anggota123",
-            }));
-          }
-
-          window.location.href = "katalog_anggota.html";
-          return;
-        } else {
-          throw new Error("Username/email atau password yang Anda masukkan salah.");
-        }
-      }
-
-      // --- MODE ASLI: manggil backend beneran ---
-      // TODO: ganti endpoint sesuai yang disediakan backend, misal "/auth/login-anggota"
+      // Panggil backend beneran
       const result = await apiRequest("/auth/login-anggota", "POST", {
         identifier,
         password,

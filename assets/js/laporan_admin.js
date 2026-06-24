@@ -2,34 +2,7 @@
 // laporan_admin.js — Logic Laporan Admin
 // ===========================================
 
-const SIMULATION_MODE = true;
 
-// ===== DUMMY DATA =====
-const DUMMY_TRANSAKSI = [
-  { id: "TRX-001", anggota: "Inas Amatullah", buku: "The Great Gatsby", tglPinjam: "2026-06-01", tglKembali: "2026-06-10", status: "selesai", denda: 0 },
-  { id: "TRX-002", anggota: "Budi Santoso",   buku: "Sapiens",          tglPinjam: "2026-06-03", tglKembali: "2026-06-20", status: "selesai", denda: 30000 },
-  { id: "TRX-003", anggota: "Rina Dewi",      buku: "To Kill a Mocking Bird", tglPinjam: "2026-06-05", tglKembali: null, status: "aktif", denda: 0 },
-  { id: "TRX-004", anggota: "Inas Amatullah", buku: "Introduction to Algorithms", tglPinjam: "2026-06-07", tglKembali: null, status: "terlambat", denda: 15000 },
-  { id: "TRX-005", anggota: "Budi Santoso",   buku: "The Great Gatsby", tglPinjam: "2026-06-10", tglKembali: "2026-06-15", status: "selesai", denda: 0 },
-  { id: "TRX-006", anggota: "Sari Indah",     buku: "Sapiens",          tglPinjam: "2026-06-12", tglKembali: null, status: "aktif", denda: 0 },
-  { id: "TRX-007", anggota: "Ahmad Fauzi",    buku: "To Kill a Mocking Bird", tglPinjam: "2026-06-14", tglKembali: "2026-06-28", status: "selesai", denda: 45000 },
-  { id: "TRX-008", anggota: "Rina Dewi",      buku: "Introduction to Algorithms", tglPinjam: "2026-06-18", tglKembali: null, status: "terlambat", denda: 10000 },
-];
-
-const DUMMY_BUKU = [
-  { id: "678-0004", judul: "Sapiens: A Brief History of Humankind", pengarang: "Yuval Noah Harari", kategori: "History", isbn: "978-0771038501", status: "available" },
-  { id: "678-0002", judul: "To Kill a Mocking Bird",                pengarang: "Harper Lee",          kategori: "Fiction", isbn: "978-0446310789", status: "available" },
-  { id: "678-0003", judul: "The Great Gatsby",                      pengarang: "F. Scott Fitzgerald", kategori: "Fiction", isbn: "978-0743273565", status: "unavailable" },
-  { id: "678-0001", judul: "Introduction to Algorithms",            pengarang: "Thomas H. Carmen",    kategori: "Science", isbn: "978-0262046305", status: "available" },
-];
-
-const DUMMY_ANGGOTA = [
-  { id: "USR-001", nama: "Inas Amatullah", username: "inas.a",   email: "inas.amtllh@gmail.com",  status: "aktif" },
-  { id: "USR-002", nama: "Budi Santoso",   username: "budi.s",   email: "budi.s@gmail.com",        status: "aktif" },
-  { id: "USR-003", nama: "Rina Dewi",      username: "rina.d",   email: "rina.dewi@gmail.com",     status: "aktif" },
-  { id: "USR-004", nama: "Sari Indah",     username: "sari.i",   email: "sari.indah@gmail.com",    status: "aktif" },
-  { id: "USR-005", nama: "Ahmad Fauzi",    username: "ahmad.f",  email: "ahmad.f@gmail.com",       status: "nonaktif" },
-];
 
 // ===== ENDPOINTS (untuk mode asli) =====
 // GET /laporan/stats?start=...&end=...         → { totalTransaksi, bukuDipinjam, anggotaAktif, totalDenda }
@@ -83,19 +56,7 @@ function filterByDate(data, startStr, endStr) {
 
 // ===== FETCH STATS =====
 async function loadStats(start, end) {
-  if (SIMULATION_MODE) {
-    await new Promise(r => setTimeout(r, 200));
-    const filtered = filterByDate(DUMMY_TRANSAKSI, start, end);
-    const totalDenda = filtered.reduce((sum, t) => sum + (t.denda || 0), 0);
-    const bukuSet = new Set(filtered.map(t => t.buku));
-    return {
-      totalTransaksi: filtered.length,
-      bukuDipinjam:   bukuSet.size,
-      anggotaAktif:   DUMMY_ANGGOTA.filter(a => a.status === "aktif").length,
-      totalDenda,
-    };
-  }
-  // MODE ASLI
+
   const params = new URLSearchParams();
   if (start) params.append("start", start);
   if (end)   params.append("end", end);
@@ -104,16 +65,7 @@ async function loadStats(start, end) {
 
 // ===== FETCH DATA TABLE =====
 async function loadTableData(jenis, start, end) {
-  if (SIMULATION_MODE) {
-    await new Promise(r => setTimeout(r, 250));
-    if (jenis === "transaksi")    return filterByDate(DUMMY_TRANSAKSI, start, end);
-    if (jenis === "buku")         return DUMMY_BUKU;
-    if (jenis === "anggota")      return DUMMY_ANGGOTA;
-    if (jenis === "peminjaman")   return filterByDate(DUMMY_TRANSAKSI.filter(t => t.status === "aktif" || t.status === "terlambat"), start, end);
-    if (jenis === "pengembalian") return filterByDate(DUMMY_TRANSAKSI.filter(t => t.status === "selesai"), start, end);
-    return [];
-  }
-  // MODE ASLI
+
   const params = new URLSearchParams();
   if (start) params.append("start", start);
   if (end)   params.append("end", end);
@@ -156,8 +108,8 @@ const CONFIGS = {
     row: (item) => `
       <td>
         <div class="buku-cell">
-          <div class="buku-thumb">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+          <div class="buku-thumb"${item.cover ? ` style="background-image: url('${item.cover}'); background-size: cover; background-position: center;"` : ''}>
+            ${item.cover ? '' : `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>`}
           </div>
           <div>
             <div class="buku-judul">${item.judul}</div>
@@ -234,9 +186,10 @@ function exportCSV(jenis, data) {
   const cfg = CONFIGS[jenis];
   const headers = cfg.headers;
 
-  const rows = data.map(item => {
+  const rows = data.map((item, index) => {
     if (jenis === "transaksi" || jenis === "pengembalian") {
       return [
+        index + 1,
         item.anggota || "",
         item.buku || "",
         item.tglPinjam || "",
@@ -245,13 +198,20 @@ function exportCSV(jenis, data) {
       ];
     }
     if (jenis === "buku") {
-      return [item.judul, item.pengarang, item.kategori, item.id, item.isbn, item.status];
+      return [`${item.judul} - ${item.pengarang}`, item.kategori, item.id, item.isbn, item.status];
     }
     if (jenis === "anggota") {
       return [item.nama, item.username, item.email, item.status];
     }
     if (jenis === "peminjaman") {
-      return [item.anggota, item.buku, item.tglPinjam, item.tglKembali || "", item.status];
+      return [
+        index + 1,
+        item.anggota || "",
+        item.buku || "",
+        item.tglPinjam || "",
+        item.tglKembali || "",
+        item.status || "",
+      ];
     }
     return [];
   });
@@ -301,10 +261,9 @@ function setDefaultDates() {
 // ===== DOMContentLoaded =====
 document.addEventListener("DOMContentLoaded", () => {
   // nama admin
-  const savedAdmin = localStorage.getItem("dummy_admin");
-  if (savedAdmin) {
-    try { document.getElementById("adminName").textContent = JSON.parse(savedAdmin).nama; } catch {}
-  }
+  apiRequest("/admin/profil", "GET").then(res => {
+    if (res && res.nama) document.getElementById("adminName").textContent = res.nama;
+  }).catch(() => {});
 
   setDefaultDates();
   loadAll();
