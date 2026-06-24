@@ -1,14 +1,9 @@
 // ===========================================
 // api.js — Pusat konfigurasi & fungsi fetch ke backend
-// Ganti BASE_URL sesuai alamat backend dari temenmu
 // ===========================================
 
-const BASE_URL = "http://localhost:8000/api"; // TODO: sesuaikan dengan backend
+const BASE_URL = "https://libraryapsiteo-production.up.railway.app/api";
 
-/**
- * Fungsi generik untuk request ke backend.
- * Pakai ini supaya semua halaman manggil API dengan cara yang sama.
- */
 async function apiRequest(endpoint, method = "GET", body = null) {
   const options = {
     method,
